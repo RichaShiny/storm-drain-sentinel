@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="A visual AI command center for storm-drain monitoring and flood-prevention dispatch." />
+    <title>Storm Drain Sentinel</title>
+    <style>
+      :root { --ink:#e9f3f5; --muted:#91a8b0; --panel:#11242c; --panel2:#0d1b21; --line:rgba(151,197,207,.16); --aqua:#49e4d2; --cyan:#43b9ee; --amber:#ffbf5b; --red:#ff6c6c; }
+      * { box-sizing:border-box; } body { margin:0; color:var(--ink); font:16px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:radial-gradient(circle at 80% -10%,#17495a 0,transparent 33%),#071217; }
+      button { font:inherit; cursor:pointer; } .app { max-width:1510px; margin:auto; padding:24px clamp(16px,3vw,48px) 40px; }
+      header { display:flex; align-items:center; justify-content:space-between; gap:18px; padding-bottom:24px; border-bottom:1px solid var(--line); }
+      .brand { display:flex; gap:13px; align-items:center; } .mark { width:37px;height:37px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(135deg,var(--aqua),var(--cyan)); color:#062027;font-weight:900;box-shadow:0 0 30px rgba(73,228,210,.24); }
+      h1 { font-size:1.15rem; margin:0; letter-spacing:.01em; } .sub { margin:2px 0 0;color:var(--muted);font-size:.81rem; } .status { display:flex; align-items:center;gap:9px;color:#bce7d4;font-size:.85rem; } .dot {width:8px;height:8px;background:var(--aqua);border-radius:50%;box-shadow:0 0 12px var(--aqua);}
+      .summary { display:grid;grid-template-columns:2fr repeat(3,1fr);gap:12px;margin:24px 0; } .card { background:linear-gradient(145deg,rgba(21,48,58,.94),rgba(11,28,34,.94));border:1px solid var(--line);border-radius:16px;padding:17px 18px;box-shadow:0 18px 45px rgba(0,0,0,.16); }
+      .eyebrow { color:var(--muted);font-size:.73rem;text-transform:uppercase;letter-spacing:.1em; } .location {font-size:1.13rem;font-weight:650;margin-top:2px;} .metric {font-size:1.7rem;font-weight:750;line-height:1.12;margin-top:6px;} .metric span {font-size:.83rem;font-weight:500;color:var(--muted);} .danger { color:var(--amber); } .danger.red {color:var(--red);}
+      main { display:grid;grid-template-columns:minmax(0,1.45fr) minmax(320px,.78fr);gap:17px; } .camera { min-height:510px;padding:0;overflow:hidden;position:relative;background:#06141a; } #scene { width:100%;height:430px;display:block;background:#0b1a1d; } .feedbar { display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 17px; } .feedname {font-weight:650;} .feedmeta {color:var(--muted);font-size:.82rem;margin-top:2px;} .badge {color:#062027;background:var(--aqua);padding:5px 9px;border-radius:999px;font-size:.73rem;font-weight:800;letter-spacing:.04em;}
+      .hud { position:absolute;top:18px;left:18px;display:flex;gap:8px;align-items:center;font-size:.76rem; }.live {color:#fff;background:#d94d5f;padding:5px 8px;border-radius:5px;font-weight:800;letter-spacing:.08em;}.time {padding:5px 8px;background:rgba(6,18,23,.72);border:1px solid rgba(255,255,255,.16);border-radius:5px;}
+      .right {display:grid;gap:17px;} .panel-title {display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;font-weight:700;}.panel-title small{color:var(--muted);font-weight:500;font-size:.77rem}.risk {display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:11px 0;border-top:1px solid var(--line);}.risk:first-of-type{border-top:0}.bar {height:7px;border-radius:999px;background:#1b343c;overflow:hidden;margin-top:7px}.bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--aqua),var(--amber));}.rank {font-size:.77rem;color:var(--muted);}.score {font-size:1.05rem;font-weight:750;color:var(--amber);}
+      .map {position:relative;height:230px;overflow:hidden;background:linear-gradient(135deg,#0b2428,#102d34);}.map:before {content:"";position:absolute;inset:-35px;background:repeating-linear-gradient(115deg,transparent 0 31px,rgba(126,206,208,.12) 32px 34px,transparent 35px 63px),repeating-linear-gradient(20deg,transparent 0 47px,rgba(126,206,208,.08) 48px 50px,transparent 51px 90px);transform:rotate(-5deg) scale(1.14)}.pin {position:absolute;width:13px;height:13px;border-radius:50%;border:2px solid #051519;box-shadow:0 0 0 5px rgba(255,191,91,.18),0 0 18px currentColor}.pin.hot{background:var(--red);color:var(--red);left:53%;top:44%}.pin.warn{background:var(--amber);color:var(--amber);left:72%;top:29%}.pin.good{background:var(--aqua);color:var(--aqua);left:29%;top:67%}.maplabel{position:absolute;left:17px;bottom:15px;font-size:.77rem;background:rgba(6,18,23,.82);padding:6px 8px;border-radius:6px;color:#c7e5e8;}
+      .actions {display:flex;gap:9px;flex-wrap:wrap}.primary,.secondary {border:0;border-radius:9px;padding:10px 13px;font-weight:700;font-size:.84rem}.primary{background:var(--aqua);color:#062027}.secondary{background:#19333c;color:#d6e9eb;border:1px solid var(--line)}.note {color:var(--muted);font-size:.79rem;margin:13px 0 0}.event{display:grid;grid-template-columns:9px 1fr auto;gap:10px;align-items:start;padding:11px 0;border-top:1px solid var(--line);font-size:.86rem}.event b{font-size:.78rem}.event time{color:var(--muted);font-size:.75rem}.event-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;background:var(--cyan)}.event-dot.alert{background:var(--amber)}
+      @media(max-width:860px){.summary{grid-template-columns:1fr 1fr}.summary .card:first-child{grid-column:1/-1}main{grid-template-columns:1fr}.camera{min-height:auto}#scene{height:350px}}@media(max-width:520px){header{align-items:flex-start;flex-direction:column}.summary{grid-template-columns:1fr}.summary .card:first-child{grid-column:auto}.app{padding-top:17px}.metric{font-size:1.45rem}}
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header>
+        <div class="brand"><div class="mark">S</div><div><h1>Storm Drain Sentinel</h1><p class="sub">Flood prevention command center</p></div></div>
+        <div class="status"><span class="dot"></span> Monitoring 12 public feeds</div>
+      </header>
+      <section class="summary" aria-label="Current status">
+        <div class="card"><div class="eyebrow">Priority incident</div><div class="location">Jackson Ave &amp; 41st Rd</div><div class="sub">Camera 04 · Queens pilot zone</div></div>
+        <div class="card"><div class="eyebrow">Blockage confidence</div><div class="metric danger" id="confidence">87<span>%</span></div></div>
+        <div class="card"><div class="eyebrow">Rain in next 3 hrs</div><div class="metric">1.4<span> in</span></div></div>
+        <div class="card"><div class="eyebrow">Drains needing review</div><div class="metric danger red">3</div></div>
+      </section>
+      <main>
+        <section class="card camera" aria-label="Live camera analysis">
+          <canvas id="scene" aria-label="Animated street-camera footage showing a blocked storm drain"></canvas>
+          <div class="hud"><span class="live">LIVE</span><span class="time" id="clock">14:32:08</span></div>
+          <div class="feedbar"><div><div class="feedname">CAM-04 · Jackson Ave / 41st Rd</div><div class="feedmeta">Public right-of-way feed · AI frame analysis every 2 sec</div></div><span class="badge" id="mode">BLOCKAGE DETECTED</span></div>
+        </section>
+        <aside class="right">
+          <section class="card"><div class="panel-title">Dispatch queue <small>ranked by exposure</small></div>
+            <div class="risk"><div><b>Jackson Ave &amp; 41st Rd</b><div class="bar"><i style="width:87%"></i></div></div><div class="score">87</div></div>
+            <div class="risk"><div><b>Queens Blvd &amp; 36th St</b><div class="bar"><i style="width:71%"></i></div></div><div class="score">71</div></div>
+            <div class="risk"><div><b>Skillman Ave underpass</b><div class="bar"><i style="width:53%"></i></div></div><div class="score">53</div></div>
+          </section>
+          <section class="card map"><div class="panel-title" style="position:relative"><span>Risk map</span><small>Queens pilot</small></div><span class="pin hot"></span><span class="pin warn"></span><span class="pin good"></span><span class="maplabel">● Incident radius · 180 m</span></section>
+          <section class="card"><div class="panel-title"><span>Recommended action</span><small>human review required</small></div><div id="actionCopy"><b>Send drainage crew for visual confirmation.</b><br><span class="sub">Leaves and debris are occluding 68% of the inlet; rain intensity is rising.</span></div><div class="actions" style="margin-top:15px"><button class="primary" id="dispatch">Stage crew review</button><button class="secondary" id="simulate">Run next frame</button></div><p class="note" id="note">No emergency services are contacted by this demo.</p></section>
+          <section class="card"><div class="panel-title"><span>Event trail</span><small>last 12 min</small></div><div class="event"><span class="event-dot alert"></span><div><b>Debris pattern persisted</b><br><span class="sub">Confidence crossed review threshold.</span></div><time>14:31</time></div><div class="event"><span class="event-dot"></span><div><b>Rain rate increased</b><br><span class="sub">Now 0.29 in / hr.</span></div><time>14:27</time></div></section>
+        </aside>
+      </main>
+    </div>
+    <script>
+      const c=document.querySelector('#scene'),x=c.getContext('2d'); let phase=0, dispatched=false;
+      function draw(){const w=c.width=c.clientWidth*devicePixelRatio,h=c.height=c.clientHeight*devicePixelRatio,s=devicePixelRatio;x.setTransform(s,0,0,s,0,0);const W=c.clientWidth,H=c.clientHeight;
+        x.fillStyle='#10272c';x.fillRect(0,0,W,H);x.fillStyle='#1a4244';x.fillRect(0,H*.18,W,H*.2);x.fillStyle='#0a1618';x.beginPath();x.moveTo(0,H*.4);x.lineTo(W,H*.29);x.lineTo(W,H);x.lineTo(0,H);x.fill();
+        x.fillStyle='#152d31';x.fillRect(W*.61,H*.22,W*.11,H*.42);x.fillStyle='#234c4e';for(let i=0;i<5;i++)x.fillRect(W*.625,H*(.25+i*.08),W*.075,H*.045);
+        x.strokeStyle='rgba(232,245,241,.42)';x.lineWidth=3;x.setLineDash([22,20]);x.beginPath();x.moveTo(W*.16,H);x.lineTo(W*.48,H*.43);x.stroke();x.setLineDash([]);
+        const dy=H*.75; x.fillStyle='#151e1e';x.fillRect(W*.42,dy,W*.25,H*.09);x.strokeStyle='#83e7db';x.lineWidth=2;x.strokeRect(W*.42,dy,W*.25,H*.09); for(let i=1;i<5;i++){x.beginPath();x.moveTo(W*(.42+i*.05),dy);x.lineTo(W*(.42+i*.05),dy+H*.09);x.stroke()}
+        x.fillStyle='rgba(114,73,26,.92)'; for(let i=0;i<18;i++){let a=i*1.9+phase*.04;x.beginPath();x.ellipse(W*(.43+(i%6)*.038)+Math.sin(a)*5,dy+H*(.02+(i%4)*.013),9,4,a,0,6.3);x.fill()}
+        x.strokeStyle='rgba(91,209,226,.5)';x.lineWidth=1;for(let i=0;i<55;i++){let px=(i*47+phase*2)%W,py=(i*73+phase*7)%(H*.78);x.beginPath();x.moveTo(px,py);x.lineTo(px-5,py+15);x.stroke()}
+        x.strokeStyle=dispatched?'#49e4d2':'#ffbf5b';x.lineWidth=3;x.setLineDash([8,5]);x.strokeRect(W*.38,dy-H*.055,W*.34,H*.2);x.setLineDash([]);x.fillStyle=dispatched?'#49e4d2':'#ffbf5b';x.font='700 12px system-ui';x.fillText(dispatched?'CREW REVIEW STAGED':'DRAIN OCCLUDED · 87%',W*.39,dy-H*.068);phase++;requestAnimationFrame(draw)}draw();
+      setInterval(()=>{const d=new Date();document.querySelector('#clock').textContent=d.toLocaleTimeString('en-US',{hour12:false})},1000);
+      document.querySelector('#simulate').onclick=()=>{const e=document.querySelector('#confidence');e.innerHTML='91<span>%</span>';document.querySelector('#note').textContent='New frame received: blockage remains visible. Human review still required.'};
+      document.querySelector('#dispatch').onclick=()=>{dispatched=true;document.querySelector('#dispatch').textContent='Review staged';document.querySelector('#dispatch').disabled=true;document.querySelector('#mode').textContent='REVIEW STAGED';document.querySelector('#actionCopy').innerHTML='<b>Review staged for field crew.</b><br><span class="sub">The operator should confirm access and local conditions before dispatch.</span>';document.querySelector('#note').textContent='Demo only: the action updates this dashboard and does not contact a real crew.'};
+      if(document.modelContext?.registerTool){document.modelContext.registerTool({name:'stage_drain_review',title:'Stage drain review',description:'Stage a human review for the highlighted storm-drain incident in the dashboard.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:false},execute:()=>{document.querySelector('#dispatch').click();return {status:'staged',incident:'Jackson Ave & 41st Rd'}}});}
+    </script>
+  </body>
+</html>
